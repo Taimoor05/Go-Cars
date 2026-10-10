@@ -1,4 +1,5 @@
 window.__goCars=1;
+const ACC={user:null}; // account state (must be declared before the first render)
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
 let W,H;
@@ -1268,7 +1269,6 @@ BRANDS.forEach(b=>SCREENS['b_'+b]=()=>[b+' \u2013 pick a car',CARS.map((c,i)=>[(
 render('main');layout();
 
 /* ================= ACCOUNT SYSTEM: Login + Sign up (Firebase Realtime Database) ================= */
-const ACC={user:null};
 (function(){
   const box=document.createElement('div');box.id='auth';$('stage').append(box);
   const okName=u=>/^[a-z0-9_]{3,12}$/.test(u);
