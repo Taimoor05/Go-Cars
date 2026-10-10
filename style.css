@@ -135,3 +135,12 @@ button.dis{opacity:.45;filter:grayscale(.6)}
 .rc small{letter-spacing:3px;opacity:.55;font-size:min(2.6cqh,12px)}
 .rc b{font-size:min(7cqh,38px);letter-spacing:.3em;padding-left:.3em;color:#fff;text-shadow:0 0 18px rgba(255,159,28,.6);font-variant-numeric:tabular-nums}
 #mp input{background:#0b0d13;color:#fff;border:1px solid var(--line);font-size:1.6em;text-align:center;letter-spacing:.25em;padding:.3em;border-radius:.4em;width:100%;box-sizing:border-box;font-family:inherit;touch-action:auto;user-select:text;-webkit-user-select:text}
+
+/* ---------- account (login / sign up) ---------- */
+#auth{display:none;position:absolute;inset:0;z-index:20;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(255,120,0,.14),rgba(0,0,0,.88) 70%)}
+.acard{width:min(400px,86cqw);max-height:94cqh;overflow:auto;display:flex;flex-direction:column;gap:1.3cqh;padding:2.4cqh;background:linear-gradient(180deg,rgba(24,28,40,.96),rgba(8,9,14,.98));border:1.5px solid var(--line);border-top:4px solid var(--acc);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.65);color:#fff;text-align:center;font-weight:700}
+.acard button{width:100%}
+.atitle{font-size:min(6cqh,30px);font-weight:900;font-style:italic;letter-spacing:2px;text-transform:uppercase;color:var(--acc)}
+.asub{font-size:min(3.2cqh,16px);opacity:.7}
+.amsg{min-height:1.2em;font-size:min(3cqh,15px);color:#ff9aa2}
+.acard input{background:#0b0d13;color:#fff;border:1px solid var(--line);font-size:min(4cqh,20px);text-align:center;padding:.5em;border-radius:.4em;width:100%;box-sizing:border-box;font-family:inherit;touch-action:auto;user-select:text;-webkit-user-select:text}

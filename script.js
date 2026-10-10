@@ -1200,7 +1200,7 @@ const pip=v=>v>=3?'MAX':'\u25cf'.repeat(v)+'\u25cb'.repeat(3-v);
 const up=(k,mx,msg,scr)=>()=>{const m=cm();if(m[k]>=3)MH=mx;else{m[k]++;MH=msg+' (level '+m[k]+')'}saveG();render(scr)};
 const cyc=(k,names,lab,scr)=>()=>{const m=cm();m[k]=(m[k]+1)%names.length;MH=lab+': '+names[m[k]];saveG();render(scr)};
 const SCREENS={
-  main:['',[['Singleplayer',()=>go('single')],['Multiplayer',()=>go('mp')],['Garage',()=>go('garage')],['Settings',()=>openSettings(()=>{})]]],
+  main:()=>[ACC.user?'Player: '+ACC.user:'',[['Singleplayer',()=>go('single')],['Multiplayer',()=>go('mp')],['Garage',()=>go('garage')],['Settings',()=>openSettings(()=>{})],['Logout',()=>ACC.logout()]]],
   single:['Singleplayer',[['Free mode',()=>go('free')],['Time trial',()=>go('trk_tt')],['Drift challenge',()=>go('trk_dc')],['Levels',()=>go('levels')],['Back',()=>go('main'),'wide']]],
   free:['Free mode',[['Track',()=>go('trk_free')],['Ground',()=>launch(()=>start('ground'))],['Back',()=>go('single')]]],
   garage:()=>['Current car: '+CARS[GAR.car].b+' '+CARS[GAR.car].n,[['Select car',()=>go('sel')],['Modify car',()=>{MH='';go('mods')}],['Back',()=>MP.gar?mpGarBack():go('main'),'wide']]],
@@ -1266,3 +1266,60 @@ function launch(fn){ // fade the menu away, then start the game
 }
 BRANDS.forEach(b=>SCREENS['b_'+b]=()=>[b+' \u2013 pick a car',CARS.map((c,i)=>[(i===GAR.car?'\u2713 ':'')+c.n,()=>{GAR.car=i;saveG();render('b_'+b)}]).filter((_,i)=>CARS[i].b===b).concat([['Back',()=>go('sel'),'wide']])]);
 render('main');layout();
+
+/* ================= ACCOUNT SYSTEM: Login + Sign up (Firebase Realtime Database) ================= */
+const ACC={user:null};
+(function(){
+  const box=document.createElement('div');box.id='auth';$('stage').append(box);
+  const okName=u=>/^[a-z0-9_]{3,12}$/.test(u);
+  const tmo=(p,ms)=>Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),ms))]);
+  async function hash(p,salt){
+    const s=salt+':'+p;
+    try{if(window.crypto&&crypto.subtle){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}
+    let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+    h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+    return 'f'+(h2>>>0).toString(16).padStart(8,'0')+(h1>>>0).toString(16).padStart(8,'0')}
+  const salt=()=>Array.from({length:16},()=>Math.floor(Math.random()*36).toString(36)).join('');
+  function dbRef(u){const db=fbDb(0);if(!db)throw new Error('nofb');return{db,ref:db.ref('accounts/'+u)}}
+  const off=db=>{db._t=setTimeout(()=>{try{db.goOffline()}catch(e){}},1500)};
+  const errTxt=e=>/PERMISSION/i.test(e&&(e.code||e.message))?'Server ne mana kar diya (Firebase rules me "accounts" allow karo)':e&&e.message==='nofb'?'Firebase load nahi hua - internet check karo':'Internet / server problem, dobara try karo';
+  async function signUp(u,p){
+    const {db,ref}=dbRef(u);
+    try{const s=salt(),h=await hash(p,s),r=await tmo(ref.transaction(v=>v===null?{s,h,t:Date.now()}:undefined),10000);
+      if(!r.committed)throw new Error('taken')}finally{off(db)}}
+  async function logIn(u,p){
+    const {db,ref}=dbRef(u);
+    try{const sn=await tmo(ref.once('value'),10000),v=sn.val();
+      if(!v)throw new Error('none');if(await hash(p,v.s)!==v.h)throw new Error('wrong')}finally{off(db)}}
+  function enter(u){
+    ACC.user=u;try{localStorage.setItem('gocars_user',u)}catch(e){}
+    if(!MPO.name){MPO.name=u.slice(0,10);saveMPO()}
+    box.style.display='none';$('menu').style.display='flex';render('main')}
+  function show(view){
+    box.innerHTML='';box.style.display='flex';$('menu').style.display='none';
+    const card=mk('div','acard'),msgE=mk('div','amsg','');
+    if(view==='home'){
+      card.append(mk('div','atitle','Account'),mk('div','asub','Login karo ya naya account banao'),btn('Login',()=>show('login'),'pri'),btn('Sign up',()=>show('signup')))}
+    else{
+      const su=view==='signup',un=document.createElement('input'),pw=document.createElement('input'),pw2=document.createElement('input');
+      un.placeholder='Username';un.maxLength=12;un.autocapitalize='none';un.autocomplete='off';
+      pw.placeholder='Password';pw.type='password';pw.maxLength=40;
+      pw2.placeholder='Password dobara';pw2.type='password';pw2.maxLength=40;
+      let busyF=0;
+      const go_=async()=>{
+        if(busyF)return;const u=un.value.trim().toLowerCase(),p=pw.value;
+        if(!okName(u))return msgE.textContent='Username 3-12 characters: sirf a-z, 0-9 aur _';
+        if(p.length<4)return msgE.textContent='Password kam az kam 4 characters ka ho';
+        if(su&&p!==pw2.value)return msgE.textContent='Dono passwords match nahi karte';
+        busyF=1;msgE.textContent='Please wait...';
+        try{su?await signUp(u,p):await logIn(u,p);enter(u)}
+        catch(e){busyF=0;msgE.textContent=e.message==='taken'?'Ye username pehle se le liya gaya hai':e.message==='none'?'Ye account nahi mila - pehle Sign up karo':e.message==='wrong'?'Password galat hai':errTxt(e)}};
+      card.append(mk('div','atitle',su?'Sign up':'Login'),un,pw,...(su?[pw2]:[]),msgE,btn(su?'Create account':'Login',go_,'pri'),btn('Back',()=>show('home')));
+      setTimeout(()=>{try{un.focus()}catch(e){}},50)}
+    if(view==='home')card.append(msgE);
+    box.append(card)}
+  ACC.show=show;
+  ACC.logout=()=>{try{localStorage.removeItem('gocars_user')}catch(e){}ACC.user=null;show('home')};
+  let saved=null;try{saved=localStorage.getItem('gocars_user')}catch(e){}
+  if(saved&&okName(saved))enter(saved);else show('home');
+})();
