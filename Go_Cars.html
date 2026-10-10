@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Go Cars!</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+<canvas id="c"></canvas>
+<div class="menu" id="menu"><h1>Go Cars!</h1><div id="sub"></div><div class="buttons" id="btns"></div><div id="gstats"></div></div>
+<div id="ui">
+  <button id="back">Menu</button><div id="hud"></div><div id="spd"></div>
+  <div id="editbar">Drag buttons to move them <button class="sb" id="edone">Done</button><button class="sb" id="ereset">Reset</button></div>
+  <div id="wheel" class="ctl"><svg id="wsvg" viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="gLeather" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#55555c"/><stop offset=".5" stop-color="#1b1b1f"/><stop offset="1" stop-color="#3a3a41"/></linearGradient>
+      <linearGradient id="gSpkH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f4f7"/><stop offset=".5" stop-color="#9aa2ad"/><stop offset="1" stop-color="#555b65"/></linearGradient>
+      <linearGradient id="gSpkV" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1f4f7"/><stop offset=".5" stop-color="#9aa2ad"/><stop offset="1" stop-color="#555b65"/></linearGradient>
+      <radialGradient id="gHub" cx=".38" cy=".33" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#aab1bb"/><stop offset="1" stop-color="#454b54"/></radialGradient>
+      <pattern id="pGrip" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.1" height="3" fill="rgba(255,255,255,.16)"/><rect x="1.8" width=".7" height="3" fill="rgba(0,0,0,.35)"/></pattern>
+    </defs>
+    <circle cx="50" cy="50" r="48" fill="rgba(0,0,0,.28)"/>
+    <rect x="9" y="45.5" width="36" height="9" rx="3.5" fill="url(#gSpkH)" stroke="#2e3239" stroke-width=".8"/>
+    <rect x="55" y="45.5" width="36" height="9" rx="3.5" fill="url(#gSpkH)" stroke="#2e3239" stroke-width=".8"/>
+    <rect x="45.5" y="55" width="9" height="36" rx="3.5" fill="url(#gSpkV)" stroke="#2e3239" stroke-width=".8"/>
+    <path d="M12 48H44M12 52H44M56 48H88M56 52H88M48 58V89M52 58V89" stroke="rgba(255,255,255,.4)" stroke-width=".35" fill="none"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#050506" stroke-width="12.5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="url(#gLeather)" stroke-width="10.5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="url(#pGrip)" stroke-width="10.5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#e0a63c" stroke-width=".8" stroke-dasharray="2 1.5" opacity=".9"/>
+    <path d="M17 24A41 41 0 0 1 40 10" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M8.5 60A43 43 0 0 0 20 80M91.5 60A43 43 0 0 1 80 80" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="11" stroke-linecap="round"/>
+    <path d="M8.5 60A43 43 0 0 0 20 80M91.5 60A43 43 0 0 1 80 80" fill="none" stroke="url(#pGrip)" stroke-width="11" stroke-linecap="round"/>
+    <rect x="47" y="1.5" width="6" height="11" rx="1.2" fill="#e63946" stroke="#7a111b" stroke-width=".7"/>
+    <circle cx="50" cy="50" r="12.5" fill="url(#gHub)" stroke="#2e3239" stroke-width="1.2"/>
+    <circle cx="50" cy="50" r="8.6" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
+    <text x="50" y="53.2" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="8.5" fill="#c1121f" stroke="#fff" stroke-width=".3">GO</text>
+  </svg></div>
+  <div id="pedals">
+    <button class="pedal ctl" id="hnd"><svg viewBox="0 0 120 60" overflow="visible">
+      <defs>
+        <linearGradient id="hChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c727c"/><stop offset=".4" stop-color="#fafbfc"/><stop offset="1" stop-color="#6a707a"/></linearGradient>
+        <linearGradient id="hGrip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#45454d"/><stop offset=".5" stop-color="#1a1a1e"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient>
+        <radialGradient id="hRed" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ff8a8a"/><stop offset="1" stop-color="#a30f1c"/></radialGradient>
+        <radialGradient id="hPiv" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#9aa2ad"/><stop offset="1" stop-color="#3f454e"/></radialGradient>
+      </defs>
+      <ellipse cx="62" cy="44" rx="52" ry="4" fill="rgba(0,0,0,.35)"/>
+      <g class="lever">
+        <rect x="20" y="26" width="46" height="8" rx="4" fill="url(#hChrome)" stroke="#3a3f47" stroke-width=".8"/>
+        <rect x="58" y="17" width="54" height="26" rx="13" fill="url(#hGrip)" stroke="#000" stroke-width="1.3"/>
+        <rect x="62.0" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="64.6" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="67.2" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="69.8" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="72.4" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="75.0" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="77.6" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="80.19999999999999" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="82.8" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="85.39999999999999" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="88.0" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="90.6" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="93.2" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="95.8" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="98.4" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="101.0" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/><rect x="103.6" y="19" width="2.6" height="22" rx="1.2" fill="rgba(255,255,255,.2)"/><rect x="106.19999999999999" y="19" width="1.6" height="22" fill="rgba(0,0,0,.55)"/>
+        <rect x="64" y="19.5" width="40" height="3" rx="1.5" fill="rgba(255,255,255,.25)"/>
+        <circle cx="108" cy="30" r="7" fill="url(#hRed)" stroke="#5c0b13" stroke-width=".9"/>
+      </g>
+      <circle cx="24" cy="30" r="9" fill="url(#hPiv)" stroke="#2e3239" stroke-width="1.2"/>
+      <circle cx="24" cy="30" r="3" fill="#2b2f36"/>
+      <text x="62" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="9" fill="#fff" stroke="#000" stroke-width=".25" letter-spacing=".8">HAND BRAKE</text>
+    </svg></button>
+    <button class="pedal ctl" id="rev"><svg viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="vRim" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#a9b0ba"/><stop offset="1" stop-color="#454b54"/></radialGradient>
+        <radialGradient id="vFace" cx=".4" cy=".3" r=".85"><stop offset="0" stop-color="#4c4c55"/><stop offset=".6" stop-color="#1c1c20"/><stop offset="1" stop-color="#09090b"/></radialGradient>
+        <pattern id="vKnurl" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.4" height="4" fill="rgba(255,255,255,.28)"/></pattern>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#vRim)" stroke="#2b2f36" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="46" fill="url(#vKnurl)" opacity=".5"/>
+      <circle cx="50" cy="50" r="37" fill="url(#vFace)" stroke="#000" stroke-width="1.4"/>
+      <circle cx="50" cy="50" r="37" fill="none" stroke="#f2a93b" stroke-width="2.2" stroke-dasharray="7 4"/>
+      <text x="50" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="30" fill="#fff">R</text>
+      <path d="M34 72h32M34 72l7-5M34 72l7 5" fill="none" stroke="#f2a93b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-2)"/>
+      <ellipse cx="38" cy="26" rx="14" ry="6" fill="rgba(255,255,255,.18)" transform="rotate(-25 38 26)"/>
+    </svg></button>
+    <button class="pedal ctl" id="brk"><svg viewBox="0 0 100 100">
+      <defs><linearGradient id="bAlu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f9"/><stop offset=".35" stop-color="#b5bcc6"/><stop offset=".65" stop-color="#e3e7ec"/><stop offset="1" stop-color="#6d737d"/></linearGradient>
+        <linearGradient id="bRub" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2b30"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient>
+        <radialGradient id="bStud" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#6a6a74"/><stop offset=".55" stop-color="#26262b"/><stop offset="1" stop-color="#0a0a0c"/></radialGradient>
+        <linearGradient id="bPlate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f25050"/><stop offset="1" stop-color="#9a1018"/></linearGradient>
+      </defs>
+      <rect x="3" y="3" width="94" height="94" rx="14" fill="url(#bAlu)" stroke="#2b2f36" stroke-width="1.4"/>
+      <rect x="7" y="7" width="86" height="86" rx="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1"/>
+      <rect x="9" y="9" width="82" height="66" rx="8" fill="url(#bRub)" stroke="#000" stroke-width="1.4"/>
+      <circle cx="19.0" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="31.4" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="43.8" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="56.2" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="68.6" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="81.0" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="93.4" cy="18.0" r="4.4" fill="url(#bStud)"/><circle cx="19.0" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="31.4" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="43.8" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="56.2" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="68.6" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="81.0" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="93.4" cy="31.2" r="4.4" fill="url(#bStud)"/><circle cx="19.0" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="31.4" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="43.8" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="56.2" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="68.6" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="81.0" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="93.4" cy="44.4" r="4.4" fill="url(#bStud)"/><circle cx="19.0" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="31.4" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="43.8" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="56.2" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="68.6" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="81.0" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/><circle cx="93.4" cy="57.599999999999994" r="4.4" fill="url(#bStud)"/>
+      <rect x="14" y="78" width="72" height="15" rx="5" fill="url(#bPlate)" stroke="#4d070c" stroke-width="1"/>
+      <rect x="16" y="79.4" width="68" height="3.2" rx="1.6" fill="rgba(255,255,255,.3)"/>
+      <text x="50" y="89.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="11.5" fill="#fff" letter-spacing="1.2">BRAKE</text>
+      <circle cx="12" cy="12" r="2.4" fill="#5b616b" stroke="#2b2f36" stroke-width=".6"/><path d="M10.56 11.28L13.44 12.72" stroke="#1d2024" stroke-width=".7"/><circle cx="88" cy="12" r="2.4" fill="#5b616b" stroke="#2b2f36" stroke-width=".6"/><path d="M86.56 11.28L89.44 12.72" stroke="#1d2024" stroke-width=".7"/>
+    </svg></button>
+    <button class="pedal ctl" id="nos"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#1d4ed8" stroke="#0b1f5c" stroke-width="3"/><circle cx="50" cy="50" r="38" fill="none" stroke="#7fb2ff" stroke-width="2.5" stroke-dasharray="7 4"/><path d="M54 14L30 54h18l-4 32 26-44H52z" fill="#ffe14d" stroke="#8a6a00" stroke-width="1.5"/></svg></button>
+    <button class="pedal ctl" id="race"><svg viewBox="0 0 80 100">
+      <defs><linearGradient id="rAlu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f9"/><stop offset=".35" stop-color="#b5bcc6"/><stop offset=".65" stop-color="#e3e7ec"/><stop offset="1" stop-color="#6d737d"/></linearGradient>
+        <linearGradient id="rRub" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2b30"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient>
+        <linearGradient id="rRib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a52"/><stop offset=".55" stop-color="#232327"/><stop offset="1" stop-color="#111113"/></linearGradient>
+        <linearGradient id="rPlate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46d673"/><stop offset="1" stop-color="#157a35"/></linearGradient>
+      </defs>
+      <rect x="3" y="3" width="74" height="94" rx="13" fill="url(#rAlu)" stroke="#2b2f36" stroke-width="1.4"/>
+      <rect x="6.5" y="6.5" width="67" height="87" rx="10" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1"/>
+      <rect x="8" y="8" width="64" height="70" rx="8" fill="url(#rRub)" stroke="#000" stroke-width="1.4"/>
+      <rect x="11" y="12.0" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="12.6" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="21.6" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="22.2" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="31.2" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="31.799999999999997" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="40.8" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="41.4" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="50.4" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="51.0" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="60.0" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="60.6" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/><rect x="11" y="69.6" width="58" height="6" rx="3" fill="url(#rRib)"/><rect x="13" y="70.19999999999999" width="54" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/>
+      <rect x="12" y="81" width="56" height="13" rx="4.5" fill="url(#rPlate)" stroke="#0a3c19" stroke-width="1"/>
+      <rect x="14" y="82.4" width="52" height="3" rx="1.5" fill="rgba(255,255,255,.3)"/>
+      <text x="40" y="91.2" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#fff" letter-spacing="1.3">RACE</text>
+      <circle cx="11" cy="11" r="2.4" fill="#5b616b" stroke="#2b2f36" stroke-width=".6"/><path d="M9.56 10.28L12.44 11.72" stroke="#1d2024" stroke-width=".7"/><circle cx="69" cy="11" r="2.4" fill="#5b616b" stroke="#2b2f36" stroke-width=".6"/><path d="M67.56 10.28L70.44 11.72" stroke="#1d2024" stroke-width=".7"/>
+    </svg></button>
+  </div>
+</div>
+<div id="done"></div>
+<div id="pause"></div>
+<div id="settings"><h2>Settings</h2><div id="sbody"></div><button class="sb" id="sback">Back</button></div>
+<div id="mp"></div><div id="msg"></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="script.js"></script>
+<script>if(!window.__goCars)document.body.insertAdjacentHTML("afterbegin","<div style=\"position:fixed;inset:0;z-index:99;background:#222;color:#fff;padding:20px;font:16px sans-serif\"><h2>script.js load nahi hua</h2><p>Teeno files (Go_Cars.html, style.css, script.js) ek hi folder mein honi chahiye. File manager se kholne pe browser unhe link nahi kar pata. Chrome mein file:///storage/emulated/0/FOLDER/Go_Cars.html likho, ya local server (http://localhost:8080) use karo.</p></div>")</script>
+</body>
+</html>
