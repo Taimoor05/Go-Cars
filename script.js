@@ -1,4 +1,6 @@
 window.__goCars=1;
+/* ERRBOX: JS error aaye to screen ke neeche laal box me dikhao (phone pe console nahi hota) */
+addEventListener('error',e=>{try{const d=document.createElement('div');d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#b00020;color:#fff;font:13px monospace;padding:8px;white-space:pre-wrap';d.textContent='ERROR: '+e.message+'  (line '+e.lineno+')';document.body.append(d)}catch(_){}});
 const ACC={user:null}; // account state (must be declared before the first render)
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
@@ -1151,11 +1153,11 @@ function mpLobby(){
   const rc=mk('div','rc');rc.append(mk('small','','ROOM CODE'),mk('b','',MP.code||'...'));
   mpPanel('Lobby  \u2022  '+ro.length+'/'+max+' players',[sub,list,rl,bb,rc]);P.className='lobby'}
 function mpHost(n){
-  if(!window.firebase)return mpMsg('Firebase load nahi hua - internet check karo, page reload karo');
+  if(!window.firebase)return mpMsg('Firebase failed to load - check your internet and reload the page');
   mpClose();MP.host=1;MP.id=0;MP.n=n;MP.max=n;MP.ro=null;mpPanel('Creating room...',[btn('Cancel',mpCancel)]);
   const K=MPK=fbKit(1),bad=t=>{if(MPK===K){mpMsg(t);mpCancel()}};
   fbPick().then(async si=>{
-    if(MPK!==K)return;if(si<0)return bad('No server reachable - internet / Firebase config check karo');
+    if(MPK!==K)return;if(si<0)return bad('No server reachable - check your internet / Firebase config');
     const db=K.db=fbDb(si);fbPres(K);let code='';
     for(let i=0;i<8&&!code;i++){const c=si+String(Math.floor(Math.random()*1e5)).padStart(5,'0');
       const r=await db.ref('rooms/'+c+'/meta').transaction(v=>v===null?{max:n,t:Date.now()}:undefined);if(MPK!==K)return;if(r.committed)code=c}
@@ -1171,7 +1173,7 @@ function mpHost(n){
     mpLobby()}).catch(()=>bad('Could not create room'))
 }
 function mpJoin(){
-  if(!window.firebase)return mpMsg('Firebase load nahi hua - internet check karo, page reload karo');
+  if(!window.firebase)return mpMsg('Firebase failed to load - check your internet and reload the page');
   mpClose();MP.host=0;MP.ro=null;MP.cfgL=null;
   const inp=document.createElement('input');inp.inputMode='numeric';inp.maxLength=CODE_LEN;inp.placeholder='Room code';
   const doJoin=()=>{
@@ -1282,7 +1284,7 @@ render('main');layout();
   const salt=()=>Array.from({length:16},()=>Math.floor(Math.random()*36).toString(36)).join('');
   function dbRef(u){const db=fbDb(0);if(!db)throw new Error('nofb');return{db,ref:db.ref('accounts/'+u)}}
   const off=db=>{db._t=setTimeout(()=>{try{db.goOffline()}catch(e){}},1500)};
-  const errTxt=e=>/PERMISSION/i.test(e&&(e.code||e.message))?'Server ne mana kar diya (Firebase rules me "accounts" allow karo)':e&&e.message==='nofb'?'Firebase load nahi hua - internet check karo':'Internet / server problem, dobara try karo';
+  const errTxt=e=>/PERMISSION/i.test(e&&(e.code||e.message))?'Server refused the request (Firebase rules must allow \"accounts\")':e&&e.message==='nofb'?'Firebase failed to load - check your internet':'Internet / server problem, please try again';
   async function signUp(u,p){
     const {db,ref}=dbRef(u);
     try{const s=salt(),h=await hash(p,s),r=await tmo(ref.transaction(v=>v===null?{s,h,t:Date.now()}:undefined),10000);
@@ -1299,21 +1301,21 @@ render('main');layout();
     box.innerHTML='';box.style.display='flex';$('menu').style.display='none';
     const card=mk('div','acard'),msgE=mk('div','amsg','');
     if(view==='home'){
-      card.append(mk('div','atitle','Account'),mk('div','asub','Login karo ya naya account banao'),btn('Login',()=>show('login'),'pri'),btn('Sign up',()=>show('signup')))}
+      card.append(mk('div','atitle','Account'),mk('div','asub','Log in or create a new account'),btn('Login',()=>show('login'),'pri'),btn('Sign up',()=>show('signup')))}
     else{
       const su=view==='signup',un=document.createElement('input'),pw=document.createElement('input'),pw2=document.createElement('input');
       un.placeholder='Username';un.maxLength=12;un.autocapitalize='none';un.autocomplete='off';
       pw.placeholder='Password';pw.type='password';pw.maxLength=40;
-      pw2.placeholder='Password dobara';pw2.type='password';pw2.maxLength=40;
+      pw2.placeholder='Confirm password';pw2.type='password';pw2.maxLength=40;
       let busyF=0;
       const go_=async()=>{
         if(busyF)return;const u=un.value.trim().toLowerCase(),p=pw.value;
-        if(!okName(u))return msgE.textContent='Username 3-12 characters: sirf a-z, 0-9 aur _';
-        if(p.length<4)return msgE.textContent='Password kam az kam 4 characters ka ho';
-        if(su&&p!==pw2.value)return msgE.textContent='Dono passwords match nahi karte';
+        if(!okName(u))return msgE.textContent='Username: 3-12 characters, only a-z, 0-9 and _';
+        if(p.length<4)return msgE.textContent='Password must be at least 4 characters';
+        if(su&&p!==pw2.value)return msgE.textContent='Passwords do not match';
         busyF=1;msgE.textContent='Please wait...';
         try{su?await signUp(u,p):await logIn(u,p);enter(u)}
-        catch(e){busyF=0;msgE.textContent=e.message==='taken'?'Ye username pehle se le liya gaya hai':e.message==='none'?'Ye account nahi mila - pehle Sign up karo':e.message==='wrong'?'Password galat hai':errTxt(e)}};
+        catch(e){busyF=0;msgE.textContent=e.message==='taken'?'This username is already taken':e.message==='none'?'Account not found - please sign up first':e.message==='wrong'?'Wrong password':errTxt(e)}};
       card.append(mk('div','atitle',su?'Sign up':'Login'),un,pw,...(su?[pw2]:[]),msgE,btn(su?'Create account':'Login',go_,'pri'),btn('Back',()=>show('home')));
       setTimeout(()=>{try{un.focus()}catch(e){}},50)}
     if(view==='home')card.append(msgE);
