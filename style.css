@@ -144,3 +144,12 @@ button.dis{opacity:.45;filter:grayscale(.6)}
 .asub{font-size:min(3.2cqh,16px);opacity:.7}
 .amsg{min-height:1.2em;font-size:min(3cqh,15px);color:#ff9aa2}
 .acard input{background:#0b0d13;color:#fff;border:1px solid var(--line);font-size:min(4cqh,20px);text-align:center;padding:.5em;border-radius:.4em;width:100%;box-sizing:border-box;font-family:inherit;touch-action:auto;user-select:text;-webkit-user-select:text}
+
+/*GARAGE-CSS-START*/
+/* ---------- garage showroom ---------- */
+#gzoom{display:none;position:absolute;top:2cqh;right:3cqw;z-index:3;gap:6px;align-items:center}
+#gzoom button.sb{min-width:2.4em}
+.menu.gar h1{display:none}
+.menu.gar #sub{margin-top:2.6cqh}
+.menu.gar .buttons,.menu.gar .buttons.grid{margin:auto 0 3cqh 4cqw}
+/*GARAGE-CSS-END*/
